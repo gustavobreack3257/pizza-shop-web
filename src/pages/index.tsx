@@ -2,7 +2,9 @@ import Image from "next/image";
 
 import {useKeenSlider} from 'keen-slider/react'
 
+import { stripe } from "../lib/stripe";
 import {HomeContainer, Product} from '../styles/pages/home'
+
 import ShirtProductOne from '../assets/camisetas/t-shirt1.png'
 import ShirtProductTwo from '../assets/camisetas/t-shirt2.png'
 import ShirtProductThree from '../assets/camisetas/t-shirt3.png'
@@ -10,8 +12,18 @@ import ShirtProductFour from '../assets/camisetas/t-shirt4.png'
 
 import 'keen-slider/keen-slider.min.css'
 
+import Stripe from "stripe";
+import { GetServerSideProps } from "next";
 
-export default function Home(props: { list: any; }) {
+interface HomeProps {
+  products: {
+    id: string
+    name: string
+    imageUrl: string
+    price: number
+  }[]
+}
+export default function Home({products}: HomeProps) {
   const [sliderRef] = useKeenSlider({
     slides: {
       perView: 3,
@@ -23,55 +35,44 @@ export default function Home(props: { list: any; }) {
   })
   return (
     <HomeContainer ref={sliderRef} className="keen-slider">
-      <pre>{JSON.stringify(props.list)}</pre>
-      <Product className="keen-slider__slide">
-        <Image src={ShirtProductOne} height={480} alt="Imagem do Produto" priority/>
+      {products.map(product => {
+        return (
+          <Product key={product.id} className="keen-slider__slide">
+          <Image src={product.imageUrl} height={480} width={500} alt="Imagem do Produto" priority/>
 
-        <footer>
-          <strong>Camiseta X</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
+          <footer>
+            <strong>{product.name}</strong>
+            <span>{product.price}</span>
+          </footer>
+        </Product>
+        )
+      })}
 
-      <Product className="keen-slider__slide">
-        <Image src={ShirtProductTwo} height={480} alt="Imagem do Produto" priority/>
 
-        <footer>
-          <strong>Camiseta Y</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={ShirtProductThree} height={480} alt="Imagem do Produto" priority/>
-
-        <footer>
-          <strong>Camiseta W</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={ShirtProductFour} height={480} alt="Imagem do Produto" priority/>
-
-        <footer>
-          <strong>Camiseta J</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
 
     </HomeContainer>
   );
 }
 
-export const getServerSideProps = async () => {
-  await new Promise(resolve => setTimeout(resolve, 2000))
+export const getServerSideProps: GetServerSideProps = async () => {
+  const response = await stripe.products.list({
+    expand: ['data.default_price']
+  });
+  const products = response.data.map(product => {
+    const price = product.default_price as Stripe.Price;
 
   console.log('rodou')
+    return {
+      id: product.id,
+      name: product.name,
+      imageUrl: product.images[0],
+      price: price.unit_amount / 100,
+    }
+  })
 
   return {
     props: {
-      list: [1, 2, 3]
+      products
     }
   }
 }
