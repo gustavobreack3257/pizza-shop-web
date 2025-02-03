@@ -5,11 +5,6 @@ import { useKeenSlider } from "keen-slider/react";
 import { stripe } from "../lib/stripe";
 import { HomeContainer, Product } from "../styles/pages/home";
 
-import ShirtProductOne from "../assets/camisetas/t-shirt1.png";
-import ShirtProductTwo from "../assets/camisetas/t-shirt2.png";
-import ShirtProductThree from "../assets/camisetas/t-shirt3.png";
-import ShirtProductFour from "../assets/camisetas/t-shirt4.png";
-
 import "keen-slider/keen-slider.min.css";
 
 import Stripe from "stripe";
@@ -21,7 +16,7 @@ interface HomeProps {
     id: string;
     name: string;
     imageUrl: string;
-    price: number;
+    price: string;
   }[];
 }
 export default function Home({ products }: HomeProps) {
