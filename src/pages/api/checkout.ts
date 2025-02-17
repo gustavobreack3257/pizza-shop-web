@@ -1,9 +1,9 @@
 import { stripe } from "@/src/lib/stripe";
-import { error } from "console";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse){
     const {priceId} = req.body;
+    console.log('id', priceId)
 
     if (req.method !== "POST"){
         return res.status(405).json({error: "Method not allowed"})
@@ -17,6 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const cancelUrl = `${process.env.NEXT_URL}`
 
     const checkoutSession = await stripe.checkout.sessions.create({
+
         success_url: successUrl,
         cancel_url: cancelUrl,
         mode: 'payment',
@@ -28,7 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ]
     })
 
-    return res.status(201).json({
+    return(
+        console.log('query', successUrl),
+        res.status(201).json({
         checkoutUrl: checkoutSession.url
-    })
+    }))
 }

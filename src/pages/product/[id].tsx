@@ -10,6 +10,7 @@ import {
 } from "../../styles/pages/product";
 import { useState } from "react";
 import axios from "axios";
+import Head from "next/head";
 
 interface ProductProps {
   product: {
@@ -23,45 +24,57 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-  const [isCreatingCCheckoutSession, setIsCreatingCheckoutSession] = useState(false);
+  const [isCreatingCCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false);
 
   async function handleBuyButton() {
     try {
-      setIsCreatingCheckoutSession(true)
+      setIsCreatingCheckoutSession(true);
 
-      const response = await axios.post('/api/checkout',{
+      const response = await axios.post("/api/checkout", {
         priceId: product.defaultPriceId,
-      })
+      });
 
-      const {checkoutUrl} = response.data;
+      const { checkoutUrl } = response.data;
 
       window.location.href = checkoutUrl;
     } catch (error) {
-        setIsCreatingCheckoutSession(false)
+      setIsCreatingCheckoutSession(false);
 
-        alert('Falha ao redirecionar ao checkout!')
+      alert("Falha ao redirecionar ao checkout!");
     }
   }
 
   return (
-    <ProductContainer>
-      <ImageContainer>
-        <Image
-          src={product?.imageUrl}
-          width={520}
-          height={480}
-          alt="imagem do produto"
-        />
-      </ImageContainer>
-      <ProductDetails>
-        <h1>{product?.name}</h1>
-        <span>{product?.price}</span>
+    <>
+      <Head>
+        <title>{product.name} | Ignite Shop</title>
+      </Head>
 
-        <p>{product?.description}</p>
+      <ProductContainer>
+        <ImageContainer>
+          <Image
+            src={product?.imageUrl}
+            width={520}
+            height={480}
+            alt="imagem do produto"
+          />
+        </ImageContainer>
+        <ProductDetails>
+          <h1>{product?.name}</h1>
+          <span>{product?.price}</span>
 
-        <button disabled={isCreatingCCheckoutSession} onClick={handleBuyButton}>Comprar agora</button>
-      </ProductDetails>
-    </ProductContainer>
+          <p>{product?.description}</p>
+
+          <button
+            disabled={isCreatingCCheckoutSession}
+            onClick={handleBuyButton}
+          >
+            Comprar agora
+          </button>
+        </ProductDetails>
+      </ProductContainer>
+    </>
   );
 }
 
